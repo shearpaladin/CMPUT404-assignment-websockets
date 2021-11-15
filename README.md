@@ -70,3 +70,9 @@ By: Abram Hindle
 Source: https://github.com/uofa-cmput404/cmput404-slides/blob/master/examples/WebSocketsExamples/broadcaster.py
 Licensed under the Apache License, Version 2.0 (the "License")
 
+
+broadcast.html
+By: Abram Hindle
+https://github.com/uofa-cmput404/cmput404-slides/blob/master/examples/WebSocketsExamples/static/broadcast.html
+Licensed under the Apache License, Version 2.0 (the "License");
+

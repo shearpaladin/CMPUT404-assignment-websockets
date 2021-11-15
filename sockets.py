@@ -92,7 +92,8 @@ class Client:
 # Will update the clients with the json data
 def set_listener( entity, data ):
     ''' do something with the update ! '''
-    send_all_json({entity:data})
+    obj = {entity: data}
+    send_all_json(obj)
 
 myWorld.add_set_listener( set_listener )
 
