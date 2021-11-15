@@ -59,3 +59,14 @@ Contributors
 * Mark Galloway
 * Abram Hindle
 * Cole Mackenzie
+* Sandy Huang
+
+
+Sources
+============
+
+Borrowed class Client, send_all, send_all_json methods, subscribe_socket, read_ws
+By: Abram Hindle
+Source: https://github.com/uofa-cmput404/cmput404-slides/blob/master/examples/WebSocketsExamples/broadcaster.py
+Licensed under the Apache License, Version 2.0 (the "License")
+

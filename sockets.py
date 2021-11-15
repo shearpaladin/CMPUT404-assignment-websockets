@@ -59,29 +59,92 @@ class World:
     def world(self):
         return self.space
 
-myWorld = World()        
+myWorld = World()
 
+
+################################################################################################################
+# Borrowed from broadcaster.py by Abram Hindle
+# Source: https://github.com/uofa-cmput404/cmput404-slides/blob/master/examples/WebSocketsExamples/broadcaster.py
+# Licensed under the Apache License, Version 2.0 (the "License")
+clients = list()
+
+# Updates each client
+def send_all(msg):
+    for client in clients:
+        client.put(msg)
+
+# Calls send_all to update all the clients
+def send_all_json(obj):
+    send_all(json.dumps(obj))
+
+
+class Client:
+    def __init__(self):
+        self.queue = queue.Queue()
+
+    def put(self, v):
+        self.queue.put_nowait(v)
+
+    def get(self):
+        return self.queue.get()
+################################################################################################################
+
+# Will update the clients with the json data
 def set_listener( entity, data ):
     ''' do something with the update ! '''
+    send_all_json({entity:data})
 
 myWorld.add_set_listener( set_listener )
-        
+
+# Taken from assignment4
 @app.route('/')
 def hello():
     '''Return something coherent here.. perhaps redirect to /static/index.html '''
     return redirect("/static/index.html", code=302)
 
+# Borrowed from broadcaster.py by Abram Hindle
+# Source: https://github.com/uofa-cmput404/cmput404-slides/blob/master/examples/WebSocketsExamples/broadcaster.py
+# Licensed under the Apache License, Version 2.0 (the "License")
 def read_ws(ws,client):
     '''A greenlet function that reads from the websocket and updates the world'''
-    # XXX: TODO IMPLEMENT ME
-    return None
+    try:
+        while True:
+            msg = ws.receive()
+            print("WS RECV: %s" % msg)
+            if (msg is not None):
+                packet = json.loads(msg)
+                send_all_json(packet)
+            else:
+                break
+    except:
+        '''Done'''
 
+# Omg the examples helped so much!!
+
+# Hopefully Hindle's code works
+# Borrowed from broadcaster.py by Abram Hindle
+# Source: https://github.com/uofa-cmput404/cmput404-slides/blob/master/examples/WebSocketsExamples/broadcaster.py
+# Licensed under the Apache License, Version 2.0 (the "License")
 @sockets.route('/subscribe')
 def subscribe_socket(ws):
     '''Fufill the websocket URL of /subscribe, every update notify the
        websocket and read updates from the websocket '''
     # XXX: TODO IMPLEMENT ME
-    return None
+    client = Client()
+    clients.append(client)
+    g = gevent.spawn(read_ws, ws, client)
+    print("Subscribing")
+    try:
+        while True:
+            # block here
+            msg = client.get()
+            print("Got a message!")
+            ws.send(msg)
+    except Exception as e:  # WebSocketError as e:
+        print("WS Error %s" % e)
+    finally:
+        clients.remove(client)
+        gevent.kill(g)
 
 
 # I give this to you, this is how you get the raw body/data portion of a post in flask
@@ -95,6 +158,7 @@ def flask_post_json():
         return json.loads(request.data.decode("utf8"))
     else:
         return json.loads(request.form.keys()[0])
+        
 # taken from my assignemnt4
 @app.route("/entity/<entity>", methods=['POST','PUT'])
 def update(entity):
@@ -103,12 +167,14 @@ def update(entity):
     myWorld.set(entity, data)
     updateWorld = myWorld.get(entity)
     return json.dumps(updateWorld)
+
 # taken from my assignemnt4
 @app.route("/world", methods=['POST','GET'])    
 def world():
     '''you should probably return the world here'''
     world = myWorld.world()
     return json.dumps(world)
+
 # taken from my assignemnt4
 @app.route("/entity/<entity>")    
 def get_entity(entity):
