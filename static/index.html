@@ -44,12 +44,46 @@ debug("Test");
 
 world = {};
 
+
+
+function sendJSONXMLHTTPRequest(url, objects, callback) {
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState==4) {
+            try {
+                if (xhr.status==200) {
+                    //XXX: parse some JSON from the request!
+                    // https://www.w3schools.com/js/js_json_parse.asp
+                    var data = JSON.parse(xhr.responseText);
+                    //XXX: Pass the data to the callback!
+                    //console.log(" WHAT IS THIS CALLBACK?? HEREEEEEEEE!")
+                    //console.log(callback(data))
+                    callback(data);
+                }
+            } 
+            catch(e) {
+                alert('Error: ' + e.name);
+            }
+        }
+    };
+    //XXX: POST to a URL
+    // https://stackoverflow.com/questions/24468459/sending-a-json-to-server-and-retrieving-a-json-in-return-without-jquery
+    xhr.open("POST", url, true);
+    //XXX: set the mimetype and the accept headers!
+    // Remember to use application/json !
+    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.setRequestHeader("Accept", "application/json");
+
+    // for POST update(): Send POST request entity/<objects>
+    xhr.send(JSON.stringify(objects));
+
+}
+
 //XXX: TODO Make this prettier!
 // it's prettier sir!
 function drawCircle(context,entity) {
     with(context) {             
 
-        
         var radius = 5 + Math.floor((Math.random()*8)+1)
         
         beginPath(); 
@@ -127,15 +161,16 @@ function getPosition(e) {
 }
 
 
-// broadcast.html By Abram Hindle
-// Source: https://github.com/uofa-cmput404/cmput404-slides/blob/master/examples/WebSocketsExamples/static/broadcast.html
-//# Licensed under the Apache License, Version 2.0 (the "License");
+// Using my assignment4
 function addEntity(entity, data) {
     world[entity] = data;
-    drawNextFrame(); // (but should we?)
+    //drawNextFrame(); // (but should we?)
     //XXX: Send a XHTML Request that updates the entity you just modified!
-    var packet = {[entity]: data}
+    var packet = {}
+    packet[entity] = data
     socket.send(JSON.stringify(packet))
+    drawNextFrame()
+
 }
 
 
@@ -267,13 +302,28 @@ function wsSetup() {
     var url = "ws://"+host+"/subscribe";   
     socket = new WebSocket(url);
     socket.onopen = function() {
-        //XXX: TODO What are you going to do here? 
-        //drawNextFrame()
-        socket.send(JSON.stringify({NULL: world }))
+        //XXX: TODO What are you going to do here?
+        // Update function from assignment4
+        sendJSONXMLHTTPRequest("/world", null, function(data){
+            world = data // save GET request as data of current world
+            drawNextFrame(); // set drawNextFrame to true
+            drawFrame(); // draw frame 
+        })
+        
+       
     };
+
+
+
+
     socket.onerror = function(msg) {
         debug("WebSocket Error:" + msg.data);
     };
+
+
+
+
+
     socket.onmessage = function(msg) {  
         try {
             debug("WebSocket Recv:" + msg.data);
@@ -282,7 +332,7 @@ function wsSetup() {
             for (var key in recievedData){
                 world[key] = recievedData[key];
             }
-            renderFrame()
+            drawNextFrame()
 
         } catch (e) {
             alert("socket on message: " + e);

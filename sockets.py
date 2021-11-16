@@ -59,14 +59,12 @@ class World:
     def world(self):
         return self.space
 
-myWorld = World()
-
 
 ################################################################################################################
 # Borrowed from broadcaster.py by Abram Hindle
 # Source: https://github.com/uofa-cmput404/cmput404-slides/blob/master/examples/WebSocketsExamples/broadcaster.py
 # Licensed under the Apache License, Version 2.0 (the "License")
-clients = list()
+
 
 # Updates each client
 def send_all(msg):
@@ -88,6 +86,11 @@ class Client:
     def get(self):
         return self.queue.get()
 ################################################################################################################
+
+
+clients = list()
+myWorld = World()
+
 
 # Will update the clients with the json data
 def set_listener( entity, data ):
@@ -114,15 +117,16 @@ def read_ws(ws,client):
             print("WS RECV: %s" % msg)
             if (msg is not None):
                 packet = json.loads(msg) # Loads packet
-                print("THIS IS THE PACKET:", packet)
+
                 # Update World
-                for item in packet:
-                    myWorld.set(item, packet[item])
-                send_all_json(packet)
+                for entity in packet:
+                    myWorld.set(entity, packet[entity])
+
             else:
                 break
-    except:
-        '''Done'''
+    except Exception as e:
+        print (e)
+    
 
 # Omg the examples helped so much!!
 
@@ -130,6 +134,7 @@ def read_ws(ws,client):
 # Borrowed from broadcaster.py by Abram Hindle
 # Source: https://github.com/uofa-cmput404/cmput404-slides/blob/master/examples/WebSocketsExamples/broadcaster.py
 # Licensed under the Apache License, Version 2.0 (the "License")
+
 @sockets.route('/subscribe')
 def subscribe_socket(ws):
     '''Fufill the websocket URL of /subscribe, every update notify the
@@ -138,13 +143,6 @@ def subscribe_socket(ws):
     client = Client()
     clients.append(client)
     
-    # Set the World when the client joins like the Chat Example
-    currentWorld = myWorld.world()
-    for entity in  world.keys():
-        data = world[entity]
-        myWorld.set(entity, data)
-
-
     g = gevent.spawn(read_ws, ws, client)
     print("Subscribing")
     try:
@@ -158,6 +156,7 @@ def subscribe_socket(ws):
     finally:
         clients.remove(client)
         gevent.kill(g)
+    
 
 
 # I give this to you, this is how you get the raw body/data portion of a post in flask
