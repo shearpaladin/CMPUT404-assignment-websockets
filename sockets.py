@@ -113,7 +113,11 @@ def read_ws(ws,client):
             msg = ws.receive()
             print("WS RECV: %s" % msg)
             if (msg is not None):
-                packet = json.loads(msg)
+                packet = json.loads(msg) # Loads packet
+                print("THIS IS THE PACKET:", packet)
+                # Update World
+                for item in packet:
+                    myWorld.set(item, packet[item])
                 send_all_json(packet)
             else:
                 break
@@ -133,6 +137,14 @@ def subscribe_socket(ws):
     # XXX: TODO IMPLEMENT ME
     client = Client()
     clients.append(client)
+    
+    # Set the World when the client joins like the Chat Example
+    currentWorld = myWorld.world()
+    for entity in  world.keys():
+        data = world[entity]
+        myWorld.set(entity, data)
+
+
     g = gevent.spawn(read_ws, ws, client)
     print("Subscribing")
     try:

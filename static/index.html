@@ -132,12 +132,10 @@ function getPosition(e) {
 //# Licensed under the Apache License, Version 2.0 (the "License");
 function addEntity(entity, data) {
     world[entity] = data;
-    //drawNextFrame(); // (but should we?) A:No!
+    drawNextFrame(); // (but should we?)
     //XXX: Send a XHTML Request that updates the entity you just modified!
-    var packet = {};
-    packet[entity] = data;
+    var packet = {[entity]: data}
     socket.send(JSON.stringify(packet))
-    drawNextFrame();
 }
 
 
@@ -281,9 +279,9 @@ function wsSetup() {
             debug("WebSocket Recv:" + msg.data);
             //XXX: TODO What are you going to do here?
             recievedData = JSON.parse(msg.data)
-            // for (var key in recievedData){
-            //     world[key] = recievedData[key];
-            // }
+            for (var key in recievedData){
+                world[key] = recievedData[key];
+            }
             renderFrame()
 
         } catch (e) {
