@@ -82,5 +82,7 @@ Json dumps and loads https://www.educative.io/edpresso/what-is-the-difference-be
 
 Json Parse https://www.w3schools.com/js/js_json_parse.asp
 
-Sending and recieving data in JSOn format using POST/GET methods https://stackoverflow.com/questions/24468459/sending-a-json-to-server-and-retrieving-a-json-in-return-without-jquery
+Sending and recieving data in JSON format using POST/GET methods https://stackoverflow.com/questions/24468459/sending-a-json-to-server-and-retrieving-a-json-in-return-without-jquery
+
+Previous methods borrowed from Assignment 4 Ajax By Sandy Huang https://github.com/shearpaladin/CMPUT404-assignment-ajax
 
